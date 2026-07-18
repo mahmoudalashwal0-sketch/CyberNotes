@@ -8,12 +8,10 @@ import {
 import {
   collection,
   addDoc,
-  serverTimestamp,
   getDocs,
   deleteDoc,
   doc,
-  query,
-  orderBy
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 
@@ -21,9 +19,7 @@ import {
 onAuthStateChanged(auth, (user) => {
 
   if (!user) {
-
     window.location.href = "login.html";
-
   }
 
 });
@@ -32,8 +28,6 @@ onAuthStateChanged(auth, (user) => {
 // تسجيل الخروج
 const logoutBtn = document.getElementById("logoutBtn");
 
-if (logoutBtn) {
-
 logoutBtn.addEventListener("click", async () => {
 
   await signOut(auth);
@@ -41,8 +35,6 @@ logoutBtn.addEventListener("click", async () => {
   window.location.href = "login.html";
 
 });
-
-}
 
 
 // العناصر
@@ -60,220 +52,187 @@ const fileList = document.getElementById("fileList");
 
 
 
-// إضافة ملف
-uploadBtn.addEventListener("click", async () => {
-
-
-  const title = titleInput.value.trim();
-
-  const category = categorySelect.value;
-
-  const type = typeSelect.value;
-
-  const fileUrl = fileUrlInput.value.trim();
-
-
-
-  if (!title) {
-
-    alert("اكتب اسم الملف");
-
-    return;
-
-  }
-
-
-  if (!fileUrl) {
-
-    alert("الصق رابط ملف PDF");
-
-    return;
-
-  }
-
-
-
-  try {
-
-
-    uploadBtn.disabled = true;
-
-    uploadBtn.textContent = "جارٍ الحفظ...";
-
-
-
-    await addDoc(collection(db, "notes"), {
-
-
-      title: title,
-
-      category: category,
-
-      type: type,
-
-      fileUrl: fileUrl,
-
-      createdAt: serverTimestamp()
-
-
-    });
-
-
-
-    alert("✅ تم حفظ الملف بنجاح");
-
-
-
-    titleInput.value = "";
-
-    fileUrlInput.value = "";
-
-
-
-    loadFiles();
-
-
-
-  } catch(error) {
-
-
-    alert("❌ " + error.message);
-
-
-  } finally {
-
-
-    uploadBtn.disabled = false;
-
-    uploadBtn.textContent = "💾 حفظ الملف";
-
-
-  }
-
-
-});
-
-
-
-
 // عرض الملفات
 async function loadFiles(){
 
+  fileList.innerHTML = "";
 
-  if(!fileList) return;
-
-
-  fileList.innerHTML = "جارٍ تحميل الملفات...";
+  const querySnapshot = await getDocs(collection(db,"notes"));
 
 
-  try{
+  querySnapshot.forEach((item)=>{
 
 
-    const q = query(
-      collection(db,"notes"),
-      orderBy("createdAt","desc")
-    );
+    const data = item.data();
 
 
-    const snapshot = await getDocs(q);
+    fileList.innerHTML += `
 
-
-
-    fileList.innerHTML = "";
-
-
-
-    snapshot.forEach((item)=>{
-
-
-      const data = item.data();
-
-
-
-      const div = document.createElement("div");
-
-
-      div.className = "file-item";
-
-
-
-      div.innerHTML = `
+    <div class="file-item">
 
       <h4>${data.title}</h4>
 
       <p>
-      ${data.category}
-      - 
-      ${data.type}
+      ${data.category} - ${data.type}
       </p>
 
 
       <a href="${data.fileUrl}" target="_blank">
-      📖 فتح الملف
+      📄 فتح الملف
       </a>
 
 
-      <button class="delete-btn">
+      <button 
+      class="delete-btn"
+      data-id="${item.id}">
+      
       🗑️ حذف
+
       </button>
 
-      `;
+
+    </div>
+
+    `;
 
 
-
-      const deleteBtn = div.querySelector(".delete-btn");
-
+  });
 
 
-      deleteBtn.addEventListener("click", async()=>{
+  document.querySelectorAll(".delete-btn")
+  .forEach(button=>{
 
 
-        const confirmDelete = confirm(
-          "هل تريد حذف هذا الملف؟"
-        );
+    button.addEventListener("click", async()=>{
 
 
-        if(!confirmDelete) return;
+      const id = button.dataset.id;
 
 
-
-        await deleteDoc(
-          doc(db,"notes",item.id)
-        );
+      if(confirm("هل تريد حذف هذا الملف؟")){
 
 
+        await deleteDoc(doc(db,"notes",id));
 
-        alert("✅ تم الحذف");
+
+        alert("تم حذف الملف");
 
 
         loadFiles();
 
 
-      });
-
-
-
-      fileList.appendChild(div);
-
+      }
 
 
     });
 
 
-
-  }catch(error){
-
-
-    fileList.innerHTML =
-    "حدث خطأ: " + error.message;
-
-
-  }
+  });
 
 
 }
 
 
 
+// حفظ الملف
+
+uploadBtn.addEventListener("click", async()=>{
+
+
+const title = titleInput.value.trim();
+
+const category = categorySelect.value;
+
+const type = typeSelect.value;
+
+const fileUrl = fileUrlInput.value.trim();
+
+
+
+if(!title){
+
+alert("اكتب اسم الملف");
+
+return;
+
+}
+
+
+if(!fileUrl){
+
+alert("الصق رابط PDF");
+
+return;
+
+}
+
+
+
+try{
+
+
+uploadBtn.disabled=true;
+
+uploadBtn.textContent="جارٍ الحفظ...";
+
+
+
+await addDoc(collection(db,"notes"),{
+
+
+title,
+
+category,
+
+type,
+
+fileUrl,
+
+createdAt:serverTimestamp()
+
+
+});
+
+
+
+alert("✅ تم حفظ الملف بنجاح");
+
+
+
+titleInput.value="";
+
+fileUrlInput.value="";
+
+
+
+loadFiles();
+
+
+
+}
+
+catch(error){
+
+alert(error.message);
+
+}
+
+
+finally{
+
+
+uploadBtn.disabled=false;
+
+uploadBtn.textContent="💾 حفظ الملف";
+
+
+}
+
+
+
+});
+
+
 // تشغيل عرض الملفات عند فتح الصفحة
+
 loadFiles();
