@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>لوحة التحكم | CyberNotes</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="background"></div>
+
+<header class="header">
+
+<div class="logo">
+
+<div class="shield">🛡️</div>
+
+<div class="title">
+
+<h1>لوحة تحكم CyberNotes</h1>
+
+<p>Administrator Panel</p>
+
+</div>
+
+</div>
+
+<div>
+
+<a href="index.html" class="primary-btn">
+🏠 العودة للموقع
+</a>
+
+<button id="logoutBtn" class="primary-btn">
+🚪 تسجيل الخروج
+</button>
+
+</div>
+
+</header>
+
+<section class="hero">
+
+<div class="hero-badge">
+🔐 لوحة الإدارة
+</div>
+
+<h2>
+مرحبًا بك مدير الموقع
+</h2>
+
+<p>
+يمكنك من هنا إدارة جميع الملازم والمحاضرات.
+</p>
+
+</section>
+
+<section class="subjects">
+
+<!--==========================
+      إضافة ملف جديد
+===========================-->
+
+<div class="card">
+
+<div class="card-icon">📤</div>
+
+<div class="card-info">
+
+<span class="card-badge">
+إضافة ملف
+</span>
+
+<h3>
+إضافة ملزمة أو محاضرة
+</h3>
+
+<p>
+ارفع الملف إلى GitHub ثم الصق رابطه هنا.
+</p>
+
+<div class="admin-form">
+
+<input
+type="text"
+id="title"
+placeholder="اسم الملف"
+class="admin-input">
+
+<select
+id="category"
+class="admin-input">
+
+<option>أمن البيانات والمعلومات</option>
+<option>نظرية التشفير</option>
+<option>تصميم مواقع الإنترنت</option>
+<option>هياكل البيانات والخوارزميات</option>
+<option>أساسيات الشبكات</option>
+<option>معمارية الحاسوب</option>
+<option>الصراع العربي الإسرائيلي</option>
+
+</select>
+
+<select
+id="type"
+class="admin-input">
+
+<option value="ملزمة">📘 ملزمة</option>
+<option value="محاضرات">🎓 محاضرات</option>
+
+</select>
+
+<input
+type="url"
+id="fileUrl"
+placeholder="الصق رابط ملف PDF من GitHub هنا"
+class="admin-input">
+
+<button
+id="uploadBtn"
+class="primary-btn">
+
+💾 حفظ الملف
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!--==========================
+      الملفات الحالية
+===========================-->
+
+<div class="card">
+
+<div class="card-icon">📚</div>
+
+<div class="card-info">
+
+<span class="card-badge">
+الملفات الحالية
+</span>
+
+<h3>
+الملازم والمحاضرات
+</h3>
+
+<p>
+ستظهر هنا جميع الملفات الموجودة في قاعدة البيانات.
+</p>
+
+<div
+id="fileList"
+class="file-list">
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<footer class="footer">
+
+<a href="index.html" class="primary-btn">
+
+🏠 العودة للموقع
+
+</a>
+
+</footer>
+
+<script type="module" src="js/admin.js"></script>
+
+</body>
+</html>
