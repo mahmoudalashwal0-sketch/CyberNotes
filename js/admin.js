@@ -8,24 +8,35 @@ import {
 import {
   collection,
   addDoc,
-  getDocs,
-  deleteDoc,
-  doc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
+// ===============================
+// حماية لوحة التحكم (الأدمن فقط)
+// ===============================
 
-// حماية لوحة التحكم
-onAuthStateChanged(auth, (user) => {
+const ADMIN_EMAIL = "lym050244@gmail.com";
+
+onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
     window.location.href = "login.html";
+    return;
+  }
+
+  if (user.email !== ADMIN_EMAIL) {
+    alert("❌ ليس لديك صلاحية للدخول إلى لوحة التحكم");
+    await signOut(auth);
+    window.location.href = "login.html";
+    return;
   }
 
 });
 
-
+// ===============================
 // تسجيل الخروج
+// ===============================
+
 const logoutBtn = document.getElementById("logoutBtn");
 
 logoutBtn.addEventListener("click", async () => {
@@ -36,8 +47,10 @@ logoutBtn.addEventListener("click", async () => {
 
 });
 
+// ===============================
+// عناصر الصفحة
+// ===============================
 
-// العناصر
 const uploadBtn = document.getElementById("uploadBtn");
 
 const titleInput = document.getElementById("title");
@@ -48,191 +61,78 @@ const typeSelect = document.getElementById("type");
 
 const fileUrlInput = document.getElementById("fileUrl");
 
-const fileList = document.getElementById("fileList");
+// ===============================
+// حفظ الملف
+// ===============================
 
+uploadBtn.addEventListener("click", async () => {
 
+  const title = titleInput.value.trim();
 
-// عرض الملفات
-async function loadFiles(){
+  const category = categorySelect.value;
 
-  fileList.innerHTML = "";
+  const type = typeSelect.value;
 
-  const querySnapshot = await getDocs(collection(db,"notes"));
+  const fileUrl = fileUrlInput.value.trim();
 
+  if (!title) {
 
-  querySnapshot.forEach((item)=>{
+    alert("اكتب اسم الملف");
 
+    return;
 
-    const data = item.data();
+  }
 
+  if (!fileUrl) {
 
-    fileList.innerHTML += `
+    alert("الصق رابط ملف PDF");
 
-    <div class="file-item">
+    return;
 
-      <h4>${data.title}</h4>
+  }
 
-      <p>
-      ${data.category} - ${data.type}
-      </p>
+  try {
 
+    uploadBtn.disabled = true;
 
-      <a href="${data.fileUrl}" target="_blank">
-      📄 فتح الملف
-      </a>
+    uploadBtn.textContent = "جارٍ الحفظ...";
 
+    await addDoc(collection(db, "notes"), {
 
-      <button 
-      class="delete-btn"
-      data-id="${item.id}">
-      
-      🗑️ حذف
+      title: title,
 
-      </button>
+      category: category,
 
+      type: type,
 
-    </div>
+      fileUrl: fileUrl,
 
-    `;
-
-
-  });
-
-
-  document.querySelectorAll(".delete-btn")
-  .forEach(button=>{
-
-
-    button.addEventListener("click", async()=>{
-
-
-      const id = button.dataset.id;
-
-
-      if(confirm("هل تريد حذف هذا الملف؟")){
-
-
-        await deleteDoc(doc(db,"notes",id));
-
-
-        alert("تم حذف الملف");
-
-
-        loadFiles();
-
-
-      }
-
+      createdAt: serverTimestamp()
 
     });
 
+    alert("✅ تم حفظ الملف بنجاح");
 
-  });
+    titleInput.value = "";
 
+    categorySelect.selectedIndex = 0;
 
-}
+    typeSelect.selectedIndex = 0;
 
+    fileUrlInput.value = "";
 
+  } catch (error) {
 
-// حفظ الملف
+    console.error(error);
 
-uploadBtn.addEventListener("click", async()=>{
+    alert("❌ " + error.message);
 
+  } finally {
 
-const title = titleInput.value.trim();
+    uploadBtn.disabled = false;
 
-const category = categorySelect.value;
+    uploadBtn.textContent = "💾 حفظ الملف";
 
-const type = typeSelect.value;
-
-const fileUrl = fileUrlInput.value.trim();
-
-
-
-if(!title){
-
-alert("اكتب اسم الملف");
-
-return;
-
-}
-
-
-if(!fileUrl){
-
-alert("الصق رابط PDF");
-
-return;
-
-}
-
-
-
-try{
-
-
-uploadBtn.disabled=true;
-
-uploadBtn.textContent="جارٍ الحفظ...";
-
-
-
-await addDoc(collection(db,"notes"),{
-
-
-title,
-
-category,
-
-type,
-
-fileUrl,
-
-createdAt:serverTimestamp()
-
+  }
 
 });
-
-
-
-alert("✅ تم حفظ الملف بنجاح");
-
-
-
-titleInput.value="";
-
-fileUrlInput.value="";
-
-
-
-loadFiles();
-
-
-
-}
-
-catch(error){
-
-alert(error.message);
-
-}
-
-
-finally{
-
-
-uploadBtn.disabled=false;
-
-uploadBtn.textContent="💾 حفظ الملف";
-
-
-}
-
-
-
-});
-
-
-// تشغيل عرض الملفات عند فتح الصفحة
-
-loadFiles();
